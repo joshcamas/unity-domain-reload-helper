@@ -9,39 +9,66 @@ public class DomainReloadHandler
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void OnRuntimeLoad()
     {
-        int resettedValues = 0;
+        int clearedValues = 0;
         int executedMethods = 0;
 
+        /* Clear on reload */
         foreach(MemberInfo member in GetMembers<ClearOnReloadAttribute>(true))
         {
-            //Fields
+            // Fields
             FieldInfo field = member as FieldInfo;
 
             if (field != null && !field.FieldType.IsGenericParameter && field.IsStatic)
             {
-                Type t = field.FieldType;
+                Type fieldType = field.FieldType;
+                
+                // Extract attribute and access its parameters
+                var reloadAttribute = field.GetCustomAttribute<ClearOnReloadAttribute>();
+                object valueToAssign = reloadAttribute?.valueToAssign;
+                bool assignNewTypeInstance = reloadAttribute != null && reloadAttribute.assignNewTypeInstance;
 
-                try { field.SetValue(null, null); }
+                // Use valueToAssign only if it's convertible to the field value type
+                dynamic value = valueToAssign != null 
+                                ? Convert.ChangeType(valueToAssign, fieldType) 
+                                : null;
+                
+                // If assignNewTypeInstance is set, create a new instance of this type and assign it to the field
+                if (assignNewTypeInstance) value = Activator.CreateInstance(fieldType);
+                
+                try { field.SetValue(null, value); }
                 catch { }
 
-                resettedValues++;
+                clearedValues++;
             }
 
-            //Properties
+            // Properties
             PropertyInfo property = member as PropertyInfo;
 
             if (property != null && !property.PropertyType.IsGenericParameter && property.GetAccessors(true).Any(x => x.IsStatic))
             {
-                Type t = property.PropertyType;
+                Type fieldType = property.PropertyType;
+                
+                // Extract attribute and access its parameters
+                var reloadAttribute = property.GetCustomAttribute<ClearOnReloadAttribute>();
+                object valueToAssign = reloadAttribute?.valueToAssign;
+                bool assignNewTypeInstance = reloadAttribute != null && reloadAttribute.assignNewTypeInstance;
 
-                try { property.SetValue(null, null); }
+                // Use valueToAssign only if it's convertible to the property value type
+                dynamic value = valueToAssign != null 
+                    ? Convert.ChangeType(valueToAssign, fieldType) 
+                    : null;
+                
+                // If assignNewTypeInstance is set, create a new instance of this type and assign it to the property
+                if (assignNewTypeInstance) value = Activator.CreateInstance(fieldType);
+
+                try { property.SetValue(null, value); }
                 catch {  }
 
-                resettedValues++;
+                clearedValues++;
             }
         }
 
-        //Execute on reload
+        /* Execute on reload */
         foreach(MemberInfo member in GetMethodMembers<ExecuteOnReloadAttribute>(true))
         {
             MethodInfo method = member as MethodInfo;
@@ -53,7 +80,7 @@ public class DomainReloadHandler
             }
         }
 
-        Debug.Log("Reset " + resettedValues + " members, executed " + executedMethods + " methods");
+        Debug.Log($"Cleared {clearedValues} members, executed {executedMethods} methods");
     }
 
     private static IEnumerable<MemberInfo> GetMethodMembers<TAttribute>(bool inherit)
@@ -146,7 +173,7 @@ public class DomainReloadHandler
                 break;
 
             /* Find events defined as property { add; remove; } */
-            field = type.GetField("EVENT_" + eventName.ToUpper(), BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic);
+            field = type.GetField($"EVENT_{eventName.ToUpper()}", BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic);
             if (field != null)
                 break;
             type = type.BaseType;
