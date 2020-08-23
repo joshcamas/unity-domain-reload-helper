@@ -8,7 +8,7 @@ Use on static fields, properties or events that you wish to reset on playmode. Y
 Use on static methods that you want to execute during a domain reload. 
 
 ### Examples
-```
+```csharp
 public class CharacterManager : MonoBehaviour
 {
   //Will set value to default (null)
