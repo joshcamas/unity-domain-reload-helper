@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.Reflection;
+using UnityEditor;
+using UnityEngine.Profiling;
 
 public class DomainReloadHandler
 {
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void OnRuntimeLoad()
     {
+        Profiler.BeginSample("DomainReloadHandler");
         int clearedValues = 0;
         int executedMethods = 0;
 
@@ -81,6 +84,8 @@ public class DomainReloadHandler
         }
 
         Debug.Log($"Cleared {clearedValues} members, executed {executedMethods} methods");
+
+        Profiler.EndSample();
     }
 
     private static IEnumerable<MemberInfo> GetMethodMembers<TAttribute>(bool inherit)
