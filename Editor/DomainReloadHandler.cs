@@ -16,11 +16,9 @@ public class DomainReloadHandler
         int executedMethods = 0;
 
         /* Clear on reload */
-        foreach(MemberInfo member in GetMembers<ClearOnReloadAttribute>(true))
+        // foreach(MemberInfo member in GetMembers<ClearOnReloadAttribute>(true))
+        foreach(FieldInfo field in TypeCache.GetFieldsWithAttribute<ClearOnReloadAttribute>())
         {
-            // Fields
-            FieldInfo field = member as FieldInfo;
-
             if (field != null && !field.FieldType.IsGenericParameter && field.IsStatic)
             {
                 Type fieldType = field.FieldType;
@@ -45,44 +43,41 @@ public class DomainReloadHandler
             }
 
             // Properties
-            PropertyInfo property = member as PropertyInfo;
-
-            if (property != null && !property.PropertyType.IsGenericParameter && property.GetAccessors(true).Any(x => x.IsStatic))
-            {
-                Type fieldType = property.PropertyType;
-                
-                // Extract attribute and access its parameters
-                var reloadAttribute = property.GetCustomAttribute<ClearOnReloadAttribute>();
-                object valueToAssign = reloadAttribute?.valueToAssign;
-                bool assignNewTypeInstance = reloadAttribute != null && reloadAttribute.assignNewTypeInstance;
-
-                // Use valueToAssign only if it's convertible to the property value type
-                dynamic value = valueToAssign != null 
-                    ? Convert.ChangeType(valueToAssign, fieldType) 
-                    : null;
-                
-                // If assignNewTypeInstance is set, create a new instance of this type and assign it to the property
-                if (assignNewTypeInstance) value = Activator.CreateInstance(fieldType);
-
-                try { property.SetValue(null, value); }
-                catch {  }
-
-                clearedValues++;
-            }
+            // PropertyInfo property = member as PropertyInfo;
+            //
+            // if (property != null && !property.PropertyType.IsGenericParameter && property.GetAccessors(true).Any(x => x.IsStatic))
+            // {
+            //     Type fieldType = property.PropertyType;
+            //     
+            //     // Extract attribute and access its parameters
+            //     var reloadAttribute = property.GetCustomAttribute<ClearOnReloadAttribute>();
+            //     object valueToAssign = reloadAttribute?.valueToAssign;
+            //     bool assignNewTypeInstance = reloadAttribute != null && reloadAttribute.assignNewTypeInstance;
+            //
+            //     // Use valueToAssign only if it's convertible to the property value type
+            //     dynamic value = valueToAssign != null 
+            //         ? Convert.ChangeType(valueToAssign, fieldType) 
+            //         : null;
+            //     
+            //     // If assignNewTypeInstance is set, create a new instance of this type and assign it to the property
+            //     if (assignNewTypeInstance) value = Activator.CreateInstance(fieldType);
+            //
+            //     try { property.SetValue(null, value); }
+            //     catch {  }
+            //
+            //     clearedValues++;
+            // }
         }
 
         /* Execute on reload */
-        foreach(MemberInfo member in GetMethodMembers<ExecuteOnReloadAttribute>(true))
+        foreach(MethodInfo method in TypeCache.GetMethodsWithAttribute<ExecuteOnReloadAttribute>())
         {
-            MethodInfo method = member as MethodInfo;
-
             if (method != null && !method.IsGenericMethod && method.IsStatic)
             {
                 method.Invoke(null, new object[] { });
                 executedMethods++;
             }
         }
-
         Debug.Log($"Cleared {clearedValues} members, executed {executedMethods} methods");
 
         Profiler.EndSample();
