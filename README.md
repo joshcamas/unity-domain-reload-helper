@@ -1,4 +1,4 @@
-# UnityDomainReloadHelper[^1]
+# UnityDomainReloadHelper
 
 A couple of attributes that help when [Domain Reloading](https://docs.unity3d.com/2019.3/Documentation/Manual/DomainReloading.html) is disabled, which significantly decreases the time it takes for Unity to play a scene. By default Unity provides [RuntimeInitializeOnLoadMethod](https://docs.unity3d.com/Manual/DomainReloading.html) attribute to assist but it can be a little cumbersome. Here are a few helpful additions!
 
@@ -31,10 +31,14 @@ public class CharacterManager : MonoBehaviour
     Debug.Log("Clean up here.")
   }
 
+  // Does not work on properties!
+  // [ClearOnReload] 
+  static int number { get; set; }
+
   // Does not work on events!
   // [ClearOnReload] 
   static event Action onDoSomething;
-  
+
   // However, one can use ExecuteOnReload to do their own clean up.
   [ExecuteOnReload]
   static void CleanUpEvents() 
@@ -46,16 +50,11 @@ public class CharacterManager : MonoBehaviour
 }
 ```
 
-## Changes
+## FAQ
 
-On my game project which admittedly has a lot of assemblies, I added a profile statement to the [original project](https://github.com/joshcamas/unity-domain-reload-helper) and [it took 5 seconds to run](https://github.com/shanecelis/UnityDomainReloadHelper/blob/master/Documentation%7E/original-performance.png) the `DomainReloadHandler` code, which virtually nullifies the gains from turning off domain reloading. So it made the allure of these convenience attributes impractical.
+- Why not support clearing properties and events?
 
-Alexey Zakharov [mentioned using TypeCache in Steinhauer's
-post](https://forum.unity.com/threads/attribute-to-clear-static-fields-on-play-start.790226/#post-5262665).
-In a quick hack, I used [TypeCache](https://docs.unity3d.com/ScriptReference/TypeCache.html) and instead of `DomainReloadHandler` taking 5 seconds, [it took 46
-ms](https://github.com/shanecelis/UnityDomainReloadHelper/blob/master/Documentation%7E/modified-performance.png). 
-
-There are some disadvantages however. TypeCache only supports finding fields, methods, types, and derived types. But I think speed is a worthwhile advantage.
+[TypeCache](https://docs.unity3d.com/ScriptReference/TypeCache.html) makes finding attributes fast; however, it only supports finding fields, methods, types, and derived types.
 
 ## License
 
@@ -63,6 +62,4 @@ This project is released under the MIT license.
 
 ## Acknowledgments
 
-The [original project](https://github.com/joshcamas/unity-domain-reload-helper) was written by Josh Steinhauer. Kudos on the design. I didn't know about TypeCache either, and I wrote similar assembly walking code that's still present in [Minibuffer Console](http://seawisphunter.com/products/minibuffer/).
-
-[^1]: This is not the original project. It was forked by me. See Changes section for more details.
+This [project](https://github.com/joshcamas/unity-domain-reload-helper) is written by [Josh Steinhauer](https://twitter.com/joshcamas) with contributions from [Yevhen Bondarenko](https://github.com/JGroxz) and [Shane Celis](https://twitter.com/shanecelis).
