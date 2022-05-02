@@ -21,7 +21,7 @@ public class DomainReloadHandler
             if (field != null && !field.FieldType.IsGenericParameter && field.IsStatic)
             {
                 Type fieldType = field.FieldType;
-                
+
                 // Extract attribute and access its parameters
                 var reloadAttribute = field.GetCustomAttribute<ClearOnReloadAttribute>();
                 if (reloadAttribute == null)
@@ -30,21 +30,30 @@ public class DomainReloadHandler
                 bool assignNewTypeInstance = reloadAttribute.assignNewTypeInstance;
 
                 // Use valueToAssign only if it's convertible to the field value type
-                object value = valueToAssign != null
-                                ? Convert.ChangeType(valueToAssign, fieldType) 
-                                : null;
-                
+                object value = null;
+                if (valueToAssign != null) {
+                    value = Convert.ChangeType(valueToAssign, fieldType);
+                    if (value == null)
+                        Debug.LogWarning("Unable to assign value of type {valueToAssign.GetType()} to field {field.Name} of type {fieldType}.");
+                }
+
                 // If assignNewTypeInstance is set, create a new instance of this type and assign it to the field
-                if (assignNewTypeInstance) value = Activator.CreateInstance(fieldType);
-                
+                if (assignNewTypeInstance)
+                    value = Activator.CreateInstance(fieldType);
+
                 try {
                     field.SetValue(null, value);
                     clearedValues++;
                 }
                 catch {
-                    Debug.LogError("Unable to set field {field.Name}.");
+                    if (valueToAssign == null)
+                        Debug.LogWarning("Unable to clear field {field.Name}.");
+                    else
+                        Debug.LogWarning("Unable to assign field {field.Name}.");
                 }
 
+            } else {
+                Debug.LogWarning("Inapplicable field {field.Name} to clear; must be static and non-generic.");
             }
 
         }
@@ -58,7 +67,7 @@ public class DomainReloadHandler
                 executedMethods++;
             }
         }
-        // Debug.Log($"Cleared {clearedValues} members, executed {executedMethods} methods");
+        Debug.Log($"Cleared {clearedValues} members; executed {executedMethods} methods.");
 
         Profiler.EndSample();
     }
