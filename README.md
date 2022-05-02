@@ -48,12 +48,12 @@ public class CharacterManager : MonoBehaviour
 
 ## Changes
 
-On my game project which admittedly has a lot of assemblies, I added a profile statement to the [original project](https://github.com/joshcamas/unity-domain-reload-helper) and [it took 5 seconds to run](https://github.com/shanecelis/UnityDomainReloadHelper/blob/master/Documentation%7E/original-not-helping.png) the `DomainReloadHandler` code, which virtually nullifies the gains from turning off domain reloading. So it made the allure of these convenience attributes impractical.
+On my game project which admittedly has a lot of assemblies, I added a profile statement to the [original project](https://github.com/joshcamas/unity-domain-reload-helper) and [it took 5 seconds to run](https://github.com/shanecelis/UnityDomainReloadHelper/blob/master/Documentation%7E/original-performance.png) the `DomainReloadHandler` code, which virtually nullifies the gains from turning off domain reloading. So it made the allure of these convenience attributes impractical.
 
 Alexey Zakharov [mentioned using TypeCache in Steinhauer's
 post](https://forum.unity.com/threads/attribute-to-clear-static-fields-on-play-start.790226/#post-5262665).
 In a quick hack, I used [TypeCache](https://docs.unity3d.com/ScriptReference/TypeCache.html) and instead of `DomainReloadHandler` taking 5 seconds, [it took 46
-ms](https://github.com/shanecelis/UnityDomainReloadHelper/blob/master/Documentation%7E/modified-helping.png). 
+ms](https://github.com/shanecelis/UnityDomainReloadHelper/blob/master/Documentation%7E/modified-performance.png). 
 
 There are some disadvantages however. TypeCache only supports finding fields, methods, types, and derived types. But I think speed is a worthwhile advantage.
 
