@@ -34,7 +34,7 @@ public class DomainReloadHandler
                 if (valueToAssign != null) {
                     value = Convert.ChangeType(valueToAssign, fieldType);
                     if (value == null)
-                        Debug.LogWarning("Unable to assign value of type {valueToAssign.GetType()} to field {field.Name} of type {fieldType}.");
+                        Debug.LogWarning($"Unable to assign value of type {valueToAssign.GetType()} to field {field.Name} of type {fieldType}.");
                 }
 
                 // If assignNewTypeInstance is set, create a new instance of this type and assign it to the field
@@ -47,13 +47,13 @@ public class DomainReloadHandler
                 }
                 catch {
                     if (valueToAssign == null)
-                        Debug.LogWarning("Unable to clear field {field.Name}.");
+                        Debug.LogWarning($"Unable to clear field {field.Name}.");
                     else
-                        Debug.LogWarning("Unable to assign field {field.Name}.");
+                        Debug.LogWarning($"Unable to assign field {field.Name}.");
                 }
 
             } else {
-                Debug.LogWarning("Inapplicable field {field.Name} to clear; must be static and non-generic.");
+                Debug.LogWarning($"Inapplicable field {field.Name} to clear; must be static and non-generic.");
             }
 
         }
