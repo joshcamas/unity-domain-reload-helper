@@ -5,6 +5,7 @@ public class ClearOnReloadAttribute : Attribute
 {
     public readonly object valueToAssign;
     public readonly bool assignNewTypeInstance;
+    public readonly object[] arguments;
 
     /// <summary>
     ///     Marks field, property or event to be cleared on reload.
@@ -29,10 +30,11 @@ public class ClearOnReloadAttribute : Attribute
     ///     Marks field of property to be cleared or re-initialized on reload.
     /// </summary>
     /// <param name="assignNewTypeInstance">If true, field/property will be assigned a newly created object of its type on reload. Has no effect on events.</param>
-    public ClearOnReloadAttribute(bool assignNewTypeInstance = false)
+    public ClearOnReloadAttribute(bool assignNewTypeInstance = false, object[] arguments = null)
     {
         this.valueToAssign = null;
         this.assignNewTypeInstance = assignNewTypeInstance;
+        this.arguments = arguments;
     }
 }
 

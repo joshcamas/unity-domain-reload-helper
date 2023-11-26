@@ -38,8 +38,9 @@ public class DomainReloadHandler
                 }
 
                 // If assignNewTypeInstance is set, create a new instance of this type and assign it to the field
-                if (assignNewTypeInstance)
-                    value = Activator.CreateInstance(fieldType);
+                if (assignNewTypeInstance){
+                    value = Activator.CreateInstance(fieldType, reloadAttribute.arguments);
+                }
 
                 try {
                     field.SetValue(null, value);
