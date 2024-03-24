@@ -1,6 +1,6 @@
 using System;
 
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Event)]
 public class ClearOnReloadAttribute : Attribute
 {
     public readonly object valueToAssign;
